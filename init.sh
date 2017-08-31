@@ -4,7 +4,7 @@ set -e
 
 SAMBA_DOMAIN=${SAMBA_DOMAIN:-SAMDOM}
 SAMBA_REALM=${SAMBA_REALM:-SAMDOM.EXAMPLE.COM}
-LDAP_ALLOW_INSECURE=${LDAP_ALLOW_INSECURE:-false}
+LDAP_ALLOW_INSECURE=${LDAP_ALLOW_INSECURE:-true}
 
 if [[ $SAMBA_HOST_IP ]]; then
     SAMBA_HOST_IP="--host-ip=${SAMBA_HOST_IP}"
@@ -29,7 +29,7 @@ appSetup () {
     # Provision Samba
     rm -f /etc/samba/smb.conf
     rm -rf /var/lib/samba/private/*
-    samba-tool domain provision --use-rfc2307 --domain=$SAMBA_DOMAIN --realm=$SAMBA_REALM --server-role=dc\
+    samba-tool domain provision --use-rfc2307 --use-ntvfs --domain=$SAMBA_DOMAIN --host-name=dc1 --realm=$SAMBA_REALM --server-role=dc\
       --dns-backend=BIND9_DLZ --adminpass=$SAMBA_ADMIN_PASSWORD $SAMBA_HOST_IP
     cp /var/lib/samba/private/krb5.conf /etc/krb5.conf
     if [ "${LDAP_ALLOW_INSECURE,,}" == "true" ]; then
@@ -44,11 +44,10 @@ appSetup () {
     # Export kerberos keytab for use with sssd
     if [ "${OMIT_EXPORT_KEY_TAB}" != "true" ]
     then
-        samba-tool domain exportkeytab /etc/krb5.keytab --principal ${HOSTNAME}\$
+        samba-tool domain exportkeytab /etc/krb5.keytab --principal dc1\$
         cp /etc/krb5.keytab $KRBKEYTAP_CONF_BACKUP
     fi
     sed -i "s/SAMBA_REALM/${SAMBA_REALM}/" /etc/sssd/sssd.conf
-    
     cp /etc/samba/smb.conf $SAMBA_CONF_BACKUP
     cp /etc/sssd/sssd.conf $SSSD_CONF_BACKUP
 }
