@@ -43,7 +43,7 @@ _gc._tcp.samdom.example.com	service = 0 100 3268 dc1.samdom.example.com.
 Directly run on you terminal
 
 ```
-ldapsearch -LLL -H ldap://samdom.example.com -b "DC=samdom,DC=example,DC=com" -D "CN=admin,DC=samdom,DC=example,DC=com" -w "ia4uV1EeKait" "(& (sAMAccountName=<userid>)(objectCategory=user))"
+ldapsearch -LLL -H ldap://samdom.example.com -b "DC=samdom,DC=example,DC=com" -D "CN=Administrator,CN=Users,DC=samdom,DC=example,DC=com" -w "ia4uV1EeKait" "(& (sAMAccountName=gogo)(objectCategory=user))"
 ```
 
 In case, it does not work you could perform the same `lookup` inside the docker container
